@@ -29,6 +29,8 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -36,13 +38,7 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             TestTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Greeting(
-                        name = "Android",
-                        modifier = Modifier.padding(innerPadding)
-                    )
-
-                }
+                MyApp(modifier = Modifier.fillMaxSize())
             }
         }
     }
@@ -73,9 +69,33 @@ fun Greeting(name: String, modifier: Modifier = Modifier) {
     }
 }
 @Composable
-fun OnboardingScreen(modifier: Modifier = Modifier) {
-    // TODO: This state should be hoisted
+private fun Greetings(
+    modifier: Modifier = Modifier,
+    names: List<String> = List(1000) {"$it"}
+) {
+    LazyColumn(modifier = modifier.padding(vertical = 4.dp )) {
+        items(items = names) { name ->
+            Greeting(name = name)
+        }
+    }
+}
+@Composable
+fun MyApp(modifier: Modifier = Modifier) {
+
     var shouldShowOnboarding by remember { mutableStateOf(true) }
+
+    Surface(modifier) {
+        if (shouldShowOnboarding) {
+            OnboardingScreen(onContinueClicked = { shouldShowOnboarding = false })
+        } else {
+            Greetings()
+        }
+    }
+}
+@Composable
+fun OnboardingScreen(
+    onContinueClicked: () -> Unit,
+    modifier: Modifier = Modifier) {
 
     Column(
         modifier = modifier.fillMaxSize(),
@@ -85,39 +105,36 @@ fun OnboardingScreen(modifier: Modifier = Modifier) {
         Text("Welcome to the Basics Codelab!")
         Button(
             modifier = Modifier.padding(vertical = 24.dp),
-            onClick = { shouldShowOnboarding = false }
+            onClick = onContinueClicked
         ) {
             Text("Continue")
         }
     }
 }
 
+
+
 @Preview(showBackground = true, widthDp = 320, heightDp = 320)
 @Composable
 fun OnboardingPreview() {
-    BasicsCodelabTheme {
-        OnboardingScreen()
+    TestTheme {
+        OnboardingScreen(onContinueClicked = {}) // do nothing when clicked
     }
 }
 
+
+
+@Preview
 @Composable
-
-fun MyApp(
-    modifier: Modifier = Modifier,
-    names: List<String> = listOf("world", "compose", "Peace")
-) {
-    Column(modifier = modifier.padding(vertical = 4.dp )) {
-        for (name in names) {
-            Greeting(name = name)
-        }
-
+fun MyAppPreview() {
+    TestTheme {
+        MyApp(Modifier.fillMaxSize())
     }
 }
-
 @Preview(showBackground = true, widthDp = 320)
 @Composable
 fun GreetingPreview() {
     TestTheme {
-        MyApp()
+        Greetings()
     }
 }
